@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
+venv/
+
+# Environment variables
+.env
+
+# Audio files
+*.wav
+*.mp3
+*.m4a
+
+# Whisper / HuggingFace models
+.cache/
+huggingface/
+
+# Piper voices
+voice/
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
