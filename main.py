@@ -11,11 +11,6 @@ from tts import text_to_speech
 app = FastAPI()
 
 
-@app.get("/")
-async def health_check():
-    return {"status": "ok", "message": "Voice assistant server running"}
-
-
 @app.websocket("/voice")
 async def voice_assistant(websocket: WebSocket):
 
@@ -30,21 +25,23 @@ async def voice_assistant(websocket: WebSocket):
 
             message = await websocket.receive()
 
-            # audio chunks
-            if "bytes" in message:
+            # binary audio
+            if message.get("bytes"):
+
                 audio_data += message["bytes"]
 
             # stop signal
-            elif "text" in message and message["text"] == "STOP":
+            if message.get("text") == "STOP":
                 break
 
-        print("Audio received:", len(audio_data), "bytes")
 
-        if len(audio_data) < 100:
-            print("Audio too small, ignoring")
+        print("Audio size:", len(audio_data))
+
+        if len(audio_data) < 200:
+            print("Audio too small")
             return
 
-        # save PCM as wav
+        # save wav
         with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as f:
             audio_path = f.name
 
@@ -60,20 +57,16 @@ async def voice_assistant(websocket: WebSocket):
 
         os.remove(audio_path)
 
-        if not text:
-            await websocket.send_bytes(b"END")
-            return
-
         response = ask_ai(text)
 
         print("AI:", response)
 
         audio_file = text_to_speech(response)
 
-        # send PCM audio (skip WAV header)
+        # send audio to ESP32
         with open(audio_file, "rb") as f:
 
-            f.seek(44)  # skip wav header
+            f.seek(44)
 
             while True:
 
@@ -81,8 +74,6 @@ async def voice_assistant(websocket: WebSocket):
 
                 if not chunk:
                     break
-
-                print("Sending audio:", len(chunk))
 
                 await websocket.send_bytes(chunk)
 
@@ -93,7 +84,9 @@ async def voice_assistant(websocket: WebSocket):
         os.remove(audio_file)
 
     except WebSocketDisconnect:
+
         print("ESP32 disconnected")
 
     except Exception as e:
+
         print("Server error:", e)
