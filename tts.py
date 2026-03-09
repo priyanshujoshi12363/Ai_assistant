@@ -3,6 +3,7 @@ import requests
 import subprocess
 
 VOICE_DIR = "voices"
+
 MODEL_PATH = os.path.join(VOICE_DIR, "en_US-lessac-medium.onnx")
 CONFIG_PATH = os.path.join(VOICE_DIR, "en_US-lessac-medium.onnx.json")
 
@@ -11,6 +12,7 @@ CONFIG_URL = "https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/
 
 
 def download_voice():
+
     os.makedirs(VOICE_DIR, exist_ok=True)
 
     if not os.path.exists(MODEL_PATH):
@@ -24,9 +26,10 @@ def download_voice():
         open(CONFIG_PATH, "wb").write(r.content)
 
 
-def text_to_speech(text):
+download_voice()
 
-    download_voice()
+
+def text_to_speech(text):
 
     output_file = "response.wav"
 
@@ -38,6 +41,7 @@ def text_to_speech(text):
     ]
 
     process = subprocess.Popen(command, stdin=subprocess.PIPE)
+
     process.communicate(input=text.encode())
 
     return output_file

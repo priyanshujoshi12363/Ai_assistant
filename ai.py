@@ -6,9 +6,10 @@ load_dotenv()
 
 API_KEY = os.getenv("OPENROUTER_API_KEY")
 
-def ask_ai(prompt):
+URL = "https://openrouter.ai/api/v1/chat/completions"
 
-    url = "https://openrouter.ai/api/v1/chat/completions"
+
+def ask_ai(prompt):
 
     headers = {
         "Authorization": f"Bearer {API_KEY}",
@@ -17,11 +18,11 @@ def ask_ai(prompt):
 
     data = {
         "model": "meta-llama/llama-3-8b-instruct",
-        "max_tokens": 30,
+        "max_tokens": 40,
         "messages": [
             {
                 "role": "system",
-                "content": "You are a voice assistant. Reply in very short sentences (max 12 words). Clear and simple."
+                "content": "You are a voice assistant. Reply briefly."
             },
             {
                 "role": "user",
@@ -30,13 +31,18 @@ def ask_ai(prompt):
         ]
     }
 
-    response = requests.post(url, headers=headers, json=data)
+    try:
 
-    result = response.json()
+        r = requests.post(URL, headers=headers, json=data, timeout=20)
+        result = r.json()
 
-    print("API RESPONSE:", result)
+        print("AI response:", result)
 
-    if "choices" not in result:
-        return "AI Error: " + str(result)
+        if "choices" not in result:
+            return "AI error."
 
-    return result["choices"][0]["message"]["content"]
+        return result["choices"][0]["message"]["content"]
+
+    except Exception as e:
+        print("AI request failed:", e)
+        return "AI request failed."

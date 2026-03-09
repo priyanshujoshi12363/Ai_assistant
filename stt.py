@@ -6,11 +6,13 @@ model = WhisperModel(
     compute_type="int8"
 )
 
+
 def speech_to_text(audio_path):
 
     segments, info = model.transcribe(
         audio_path,
-        beam_size=1
+        beam_size=1,
+        vad_filter=True
     )
 
     text = ""
