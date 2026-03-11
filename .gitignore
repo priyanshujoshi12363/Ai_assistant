@@ -20,7 +20,7 @@ venv/
 huggingface/
 
 # Piper voices
-voices/
+
 
 # Logs
 *.log
